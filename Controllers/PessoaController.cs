@@ -1,9 +1,12 @@
 ﻿using Cadastro_Pessoa.Data;
 using Cadastro_Pessoa.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cadastro_Pessoa.Controllers;
+
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class PessoaController : ControllerBase

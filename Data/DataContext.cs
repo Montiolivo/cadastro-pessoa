@@ -10,6 +10,8 @@ public class DataContext : DbContext
     }
 
     public DbSet<Pessoa> Pessoas { get; set; }
+    public DbSet<Usuario> Usuarios { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
