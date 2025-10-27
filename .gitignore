@@ -1,0 +1,13 @@
+# User-specific files
+*.user
+*.suo
+.vs/
+
+# Build results
+bin/
+obj/
+
+# Packages
+*.nupkg
+*.snupkg
+packages/
