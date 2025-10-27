@@ -1,5 +1,6 @@
 using Cadastro_Pessoa.Data;
 using Cadastro_Pessoa.Models;
+using Cadastro_Pessoa.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -15,6 +16,15 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 
 var key = Encoding.ASCII.GetBytes("minha_chave_super_secreta_123!_1234567897878978998789!");
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        policy => policy
+            .WithOrigins("http://localhost:3000")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials());
+});
 
 builder.Services.AddAuthentication(options =>
 {
@@ -42,6 +52,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddScoped<IPessoaService, PessoaService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -91,8 +102,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseCors("AllowReactApp");
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -101,7 +101,7 @@
         "IsRequired": true
       },
       {
-        "Name": "pessoaAtualizada",
+        "Name": "pessoa",
         "Type": "Cadastro_Pessoa.Models.Pessoa",
         "IsRequired": true
       }

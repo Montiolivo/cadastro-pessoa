@@ -1,161 +1,55 @@
-﻿using Cadastro_Pessoa.Data;
-using Cadastro_Pessoa.Models;
+﻿using Cadastro_Pessoa.Models;
+using Cadastro_Pessoa.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace Cadastro_Pessoa.Controllers;
-
-[Authorize]
-[ApiController]
-[Route("api/[controller]")]
-public class PessoaController : ControllerBase
+namespace Cadastro_Pessoa.Controllers
 {
-    private readonly DataContext _context;
-
-    public PessoaController(DataContext context)
+    [Authorize]
+    [ApiController]
+    [Route("api/[controller]")]
+    public class PessoaController : ControllerBase
     {
-        _context = context;
-    }
+        private readonly IPessoaService _service;
 
-    // GET api/pessoas
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Pessoa>>> GetAll()
-    {
-        return await _context.Pessoas.ToListAsync();
-    }
-
-    // GET api/pessoas/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Pessoa>> GetById(int id)
-    {
-        var pessoa = await _context.Pessoas.FindAsync(id);
-
-        if (pessoa == null)
-            return NotFound();
-
-        return pessoa;
-    }
-
-    // POST api/pessoas
-    [HttpPost]
-    public async Task<ActionResult<Pessoa>> Create(Pessoa pessoa)
-    {
-        try
+        public PessoaController(IPessoaService service)
         {
-            // Validações adicionais
-            if (!ValidarEmail(pessoa.Email))
-                return BadRequest("E-mail inválido");
-
-            if (!ValidarCPF(pessoa.CPF))
-                return BadRequest("CPF inválido");
-
-            if (await CPFJaExiste(pessoa.CPF))
-                return BadRequest("CPF já cadastrado");
-
-            if (DateTime.Now.Year - pessoa.DataNascimento.Year > 150)
-                return BadRequest("Data de nascimento inválida");
-
-            pessoa.DataCadastro = DateTime.UtcNow;
-            pessoa.DataAtualizacao = DateTime.UtcNow;
-
-            _context.Pessoas.Add(pessoa);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetById), new { id = pessoa.Id }, pessoa);
+            _service = service;
         }
-        catch (Exception ex)
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Pessoa>>> GetAll()
         {
-            return StatusCode(500, $"Erro ao criar pessoa: {ex.Message}");
+            return Ok(await _service.GetAllAsync());
         }
-    }
 
-    // PUT api/pessoas/5
-    [HttpPut("{id}")]
-    public async Task<ActionResult<Pessoa>> Update(int id, Pessoa pessoaAtualizada)
-    {
-        var pessoa = await _context.Pessoas.FindAsync(id);
-
-        if (pessoa == null)
-            return NotFound();
-
-        try
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Pessoa>> GetById(int id)
         {
-            pessoa.Nome = pessoaAtualizada.Nome;
-            pessoa.Sexo = pessoaAtualizada.Sexo;
-            pessoa.Email = pessoaAtualizada.Email;
-            pessoa.DataNascimento = pessoaAtualizada.DataNascimento;
-            pessoa.Naturalidade = pessoaAtualizada.Naturalidade;
-            pessoa.Nacionalidade = pessoaAtualizada.Nacionalidade;
-            pessoa.CPF = pessoaAtualizada.CPF;
-            pessoa.DataAtualizacao = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(pessoa);
+            try { return Ok(await _service.GetByIdAsync(id)); }
+            catch (KeyNotFoundException e) { return NotFound(e.Message); }
         }
-        catch (Exception ex)
+
+        [HttpPost]
+        public async Task<ActionResult<Pessoa>> Create(Pessoa pessoa)
         {
-            return StatusCode(500, $"Erro ao atualizar pessoa: {ex.Message}");
+            try { return Ok(await _service.CreateAsync(pessoa)); }
+            catch (ArgumentException e) { return BadRequest(e.Message); }
         }
-    }
 
-    // DELETE api/pessoas/5
-    [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(int id)
-    {
-        var pessoa = await _context.Pessoas.FindAsync(id);
-
-        if (pessoa == null)
-            return NotFound();
-
-        try
+        [HttpPut("{id}")]
+        public async Task<ActionResult<Pessoa>> Update(int id, Pessoa pessoa)
         {
-            _context.Pessoas.Remove(pessoa);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            try { return Ok(await _service.UpdateAsync(id, pessoa)); }
+            catch (KeyNotFoundException e) { return NotFound(e.Message); }
+            catch (ArgumentException e) { return BadRequest(e.Message); }
         }
-        catch (Exception ex)
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(int id)
         {
-            return StatusCode(500, $"Erro ao deletar pessoa: {ex.Message}");
+            try { await _service.DeleteAsync(id); return NoContent(); }
+            catch (KeyNotFoundException e) { return NotFound(e.Message); }
         }
-    }
-
-    private bool ValidarEmail(string email)
-    {
-        if (string.IsNullOrEmpty(email))
-            return true; // Email é opcional
-
-        string pattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
-        return System.Text.RegularExpressions.Regex.IsMatch(email, pattern);
-    }
-
-    private bool ValidarCPF(string cpf)
-    {
-        if (!System.Text.RegularExpressions.Regex.IsMatch(cpf, @"^\d{11}$"))
-            return false;
-
-        int[] digitos = cpf.Select(d => int.Parse(d.ToString())).ToArray();
-
-        int soma1 = 0;
-        for (int i = 0; i < 9; i++)
-            soma1 += digitos[i] * (10 - i);
-
-        int digito1 = soma1 % 11 < 2 ? 0 : 11 - (soma1 % 11);
-
-        int soma2 = 0;
-        for (int i = 0; i < 10; i++)
-            soma2 += digitos[i] * (11 - i);
-
-        int digito2 = soma2 % 11 < 2 ? 0 : 11 - (soma2 % 11);
-
-        return digito1 == digitos[9] && digito2 == digitos[10];
-    }
-
-    private async Task<bool> CPFJaExiste(string cpf)
-    {
-        return await _context.Pessoas.AnyAsync(p => p.CPF == cpf);
     }
 }
-

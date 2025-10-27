@@ -1,6 +1,5 @@
 ﻿using Cadastro_Pessoa.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
 using Xunit;
 
 public class DbIntegrationFixture : IDisposable, IClassFixture<DbIntegrationFixture>
