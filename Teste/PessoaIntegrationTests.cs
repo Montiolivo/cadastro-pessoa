@@ -66,8 +66,8 @@ namespace CadastroPessoa.Tests.Controllers
             var resultado = await _controller.Create(novaPessoa);
 
             // Assert
-            var createdResult = Assert.IsType<CreatedAtActionResult>(resultado.Result);
-            var pessoaCriada = Assert.IsType<Pessoa>(createdResult.Value);
+            var okResult = Assert.IsType<OkObjectResult>(resultado.Result);
+            var pessoaCriada = Assert.IsType<Pessoa>(okResult.Value);
             Assert.Equal("Ana Souza", pessoaCriada.Nome);
             Assert.Equal(3, pessoaCriada.Id);
         }
