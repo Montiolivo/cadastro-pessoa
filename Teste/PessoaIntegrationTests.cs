@@ -1,6 +1,7 @@
 ﻿using Cadastro_Pessoa.Controllers;
 using Cadastro_Pessoa.Models;
-using Cadastro_Pessoa.Services;
+using Cadastro_Pessoa.Models.DTO;
+using Cadastro_Pessoa.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
@@ -22,10 +23,10 @@ namespace CadastroPessoa.Tests.Controllers
         public async Task GetAll_RetornaOkComLista()
         {
             // Arrange
-            var pessoas = new List<Pessoa>
+            var pessoas = new List<PessoaV1Dto>
             {
-                new Pessoa { Id = 1, Nome = "João Silva" },
-                new Pessoa { Id = 2, Nome = "Maria Oliveira" }
+                new PessoaV1Dto { Id = 1, Nome = "João Silva" },
+                new PessoaV1Dto { Id = 2, Nome = "Maria Oliveira" }
             };
 
             _mockService.Setup(s => s.GetAllAsync()).ReturnsAsync(pessoas);
@@ -43,7 +44,7 @@ namespace CadastroPessoa.Tests.Controllers
         public async Task GetById_RetornaOkComPessoa()
         {
             // Arrange
-            var pessoa = new Pessoa { Id = 1, Nome = "João Silva" };
+            var pessoa = new PessoaV1Dto { Id = 1, Nome = "João Silva" };
             _mockService.Setup(s => s.GetByIdAsync(1)).ReturnsAsync(pessoa);
 
             // Act
@@ -60,14 +61,15 @@ namespace CadastroPessoa.Tests.Controllers
         {
             // Arrange
             var novaPessoa = new Pessoa { Id = 3, Nome = "Ana Souza" };
-            _mockService.Setup(s => s.CreateAsync(novaPessoa)).ReturnsAsync(novaPessoa);
+            var pessoa = new PessoaV1Dto { Id = 3, Nome = "Ana Souza" };
+            _mockService.Setup(s => s.CreateAsync(pessoa)).ReturnsAsync(novaPessoa);
 
             // Act
-            var resultado = await _controller.Create(novaPessoa);
+            var resultado = await _controller.Create(pessoa);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(resultado.Result);
-            var pessoaCriada = Assert.IsType<Pessoa>(okResult.Value);
+            var pessoaCriada = Assert.IsType<PessoaV1Dto>(okResult.Value);
             Assert.Equal("Ana Souza", pessoaCriada.Nome);
             Assert.Equal(3, pessoaCriada.Id);
         }

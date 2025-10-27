@@ -1,6 +1,6 @@
 ﻿using Cadastro_Pessoa.Models;
 using Cadastro_Pessoa.Models.DTO;
-using Cadastro_Pessoa.Services.v2;
+using Cadastro_Pessoa.Service.Interfaces.v2;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,6 +1,7 @@
 ﻿using Cadastro_Pessoa.Data;
 using Cadastro_Pessoa.Models;
-using Cadastro_Pessoa.Services;
+using Cadastro_Pessoa.Models.DTO;
+using Cadastro_Pessoa.Service;
 using CadastroPessoa.Tests.Mocks;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
@@ -53,7 +54,7 @@ namespace CadastroPessoa.Tests.Services
         public async Task CreateAsync_AdicionaNovaPessoa()
         {
             // Arrange
-            var novaPessoa = new Pessoa
+            var novaPessoa = new PessoaV1Dto
             {
                 Nome = "Ana Souza",
                 CPF = "98765432100",
@@ -77,7 +78,7 @@ namespace CadastroPessoa.Tests.Services
         public async Task UpdateAsync_AtualizaPessoaExistente()
         {
             // Arrange
-            var pessoaAtualizada = new Pessoa
+            var pessoaAtualizada = new PessoaV1Dto
             {
                 Nome = "Maria Oliveira Atualizada",
                 CPF = "40270925031",

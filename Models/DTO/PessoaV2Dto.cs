@@ -3,6 +3,8 @@
 namespace Cadastro_Pessoa.Models.DTO;
 public class PessoaV2Dto
 {
+    public int Id { get; set; }
+
     [Required(ErrorMessage = "Nome é obrigatório")]
     public string Nome { get; set; } = string.Empty;
 

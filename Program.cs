@@ -1,7 +1,9 @@
 using Cadastro_Pessoa.Data;
 using Cadastro_Pessoa.Models;
-using Cadastro_Pessoa.Services;
-using Cadastro_Pessoa.Services.v2;
+using Cadastro_Pessoa.Service;
+using Cadastro_Pessoa.Service.Interfaces;
+using Cadastro_Pessoa.Service.Interfaces.v2;
+using Cadastro_Pessoa.Service.v2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
