@@ -8,6 +8,7 @@ using Cadastro_Pessoa.Models;
 
 [ApiController]
 [Route("api/[controller]")]
+[ApiVersionNeutral]
 public class AuthController : ControllerBase
 {
     private readonly DataContext _context;

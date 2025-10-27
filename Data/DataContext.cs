@@ -10,6 +10,7 @@ public class DataContext : DbContext
     }
 
     public DbSet<Pessoa> Pessoas { get; set; }
+    public DbSet<Endereco> Enderecos { get; set; }
     public DbSet<Usuario> Usuarios { get; set; }
 
 
@@ -18,5 +19,7 @@ public class DataContext : DbContext
         modelBuilder.Entity<Pessoa>()
             .HasIndex(p => p.CPF)
             .IsUnique(true);
+
+        modelBuilder.Entity<Pessoa>().OwnsOne(p => p.Endereco);
     }
 }

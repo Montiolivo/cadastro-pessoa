@@ -1,7 +1,10 @@
 using Cadastro_Pessoa.Data;
 using Cadastro_Pessoa.Models;
 using Cadastro_Pessoa.Services;
+using Cadastro_Pessoa.Services.v2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -20,7 +23,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
         policy => policy
-            .WithOrigins("http://localhost:3000")
+            .WithOrigins(
+                "http://localhost:3000", 
+                "https://cadastropessoafront-c7f9fpcpaxf8d8ch.brazilsouth-01.azurewebsites.net" 
+            )
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials());
@@ -53,32 +59,50 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddScoped<IPessoaService, PessoaService>();
+builder.Services.AddScoped<IPessoaServiceV2, PessoaServiceV2>();
+
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = new UrlSegmentApiVersionReader(); 
+});
+
+
+builder.Services.AddVersionedApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV"; 
+    options.SubstituteApiVersionInUrl = true;
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { Title = "API Cadastro Pessoa", Version = "v1" });
+    c.SwaggerDoc("v1", new() { Title = "API Cadastro Pessoa V1", Version = "v1" });
+    c.SwaggerDoc("v2", new() { Title = "API Cadastro Pessoa V2", Version = "v2" });
 
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
-        In = ParameterLocation.Header,
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
         Description = "Por favor insira o token JWT no formato: Bearer {seu_token}",
         Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {
-            new OpenApiSecurityScheme
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
             {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference { Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme, Id = "Bearer" }
             },
             new string[] {}
         }
     });
 });
+
 
 var app = builder.Build();
 
@@ -98,7 +122,11 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Cadastro Pessoa v1");
+    c.SwaggerEndpoint("/swagger/v2/swagger.json", "API Cadastro Pessoa v2");
+});
 
 app.UseCors("AllowReactApp");
 
