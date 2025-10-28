@@ -20,14 +20,14 @@ namespace Cadastro_Pessoa.Controllers.v2
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Pessoa>>> GetAll()
+        public async Task<ActionResult<IEnumerable<PessoaV2Dto>>> GetAll()
         {
             var pessoas = await _service.GetAllAsync();
             return Ok(pessoas);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Pessoa>> GetById(int id)
+        public async Task<ActionResult<PessoaV2Dto>> GetById(int id)
         {
             try
             {
@@ -41,7 +41,7 @@ namespace Cadastro_Pessoa.Controllers.v2
         }
 
         [HttpPost]
-        public async Task<ActionResult<Pessoa>> Create([FromBody] PessoaV2Dto dto)
+        public async Task<ActionResult<PessoaV2Dto>> Create([FromBody] PessoaV2Dto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -58,7 +58,7 @@ namespace Cadastro_Pessoa.Controllers.v2
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Pessoa>> Update(int id, [FromBody] PessoaV2Dto dto)
+        public async Task<ActionResult<PessoaV2Dto>> Update(int id, [FromBody] PessoaV2Dto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

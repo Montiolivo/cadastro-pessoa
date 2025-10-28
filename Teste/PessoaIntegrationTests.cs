@@ -60,9 +60,8 @@ namespace CadastroPessoa.Tests.Controllers
         public async Task Create_RetornaCreatedAtAction()
         {
             // Arrange
-            var novaPessoa = new Pessoa { Id = 3, Nome = "Ana Souza" };
             var pessoa = new PessoaV1Dto { Id = 3, Nome = "Ana Souza" };
-            _mockService.Setup(s => s.CreateAsync(pessoa)).ReturnsAsync(novaPessoa);
+            _mockService.Setup(s => s.CreateAsync(pessoa)).ReturnsAsync(pessoa);
 
             // Act
             var resultado = await _controller.Create(pessoa);

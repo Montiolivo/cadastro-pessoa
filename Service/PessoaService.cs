@@ -1,4 +1,5 @@
-﻿using Cadastro_Pessoa.Data;
+﻿using AutoMapper;
+using Cadastro_Pessoa.Data;
 using Cadastro_Pessoa.Models;
 using Cadastro_Pessoa.Models.DTO;
 using Cadastro_Pessoa.Service.Interfaces;
@@ -10,95 +11,61 @@ namespace Cadastro_Pessoa.Service
     public class PessoaService : IPessoaService
     {
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
 
-        public PessoaService(DataContext context)
+        public PessoaService(DataContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        // Retorna todos como DTO v1 (sem endereço)
-        public async Task<IEnumerable<PessoaV1Dto>> GetAllAsync()
-        {
-            return await _context.Pessoas
-                .Select(p => new PessoaV1Dto
-                {
-                    Id = p.Id,
-                    Nome = p.Nome,
-                    Sexo = p.Sexo,
-                    Email = p.Email,
-                    DataNascimento = p.DataNascimento,
-                    Naturalidade = p.Naturalidade,
-                    Nacionalidade = p.Nacionalidade,
-                    CPF = p.CPF
-                }).ToListAsync();
-        }
+        public async Task<IEnumerable<PessoaV1Dto>> GetAllAsync() =>
+            _mapper.Map<IEnumerable<PessoaV1Dto>>(await _context.Pessoas.ToListAsync());
 
-        // Retorna por id como DTO v1
+
         public async Task<PessoaV1Dto> GetByIdAsync(int id)
         {
             var pessoa = await _context.Pessoas.FindAsync(id);
-            if (pessoa == null) throw new KeyNotFoundException("Pessoa não encontrada.");
-
-            return new PessoaV1Dto
-            {
-                Id = pessoa.Id,
-                Nome = pessoa.Nome,
-                Sexo = pessoa.Sexo,
-                Email = pessoa.Email,
-                DataNascimento = pessoa.DataNascimento,
-                Naturalidade = pessoa.Naturalidade,
-                Nacionalidade = pessoa.Nacionalidade,
-                CPF = pessoa.CPF
-            };
+            return pessoa == null ? 
+                throw new KeyNotFoundException("Pessoa não encontrada.") : 
+                _mapper.Map<PessoaV1Dto>(pessoa);
         }
 
-        // Cria usando o modelo Pessoa
-        public async Task<Pessoa> CreateAsync(PessoaV1Dto dto)
+        public async Task<PessoaV1Dto> CreateAsync(PessoaV1Dto dto)
         {
-            var pessoa = new Pessoa
-            {
-                Nome = dto.Nome,
-                Sexo = dto.Sexo,
-                Email = dto.Email,
-                DataNascimento = dto.DataNascimento,
-                Naturalidade = dto.Naturalidade,
-                Nacionalidade = dto.Nacionalidade,
-                CPF = dto.CPF,
-                DataCadastro = DateTime.UtcNow,
-                DataAtualizacao = DateTime.UtcNow
-                // Endereço não é definido na v1
-            };
+            var pessoa = _mapper.Map<Pessoa>(dto);
+
+            pessoa.DataCadastro = DateTime.UtcNow;
+            pessoa.DataAtualizacao = DateTime.UtcNow;
 
             PessoaValidator.ValidarPessoa(pessoa, _context);
 
             _context.Pessoas.Add(pessoa);
             await _context.SaveChangesAsync();
 
-            return pessoa;
+            return _mapper.Map<PessoaV1Dto>(pessoa);
         }
 
-        public async Task<Pessoa> UpdateAsync(int id, PessoaV1Dto dto)
+        public async Task<PessoaV1Dto> UpdateAsync(int id, PessoaV1Dto dto)
         {
             var pessoa = await _context.Pessoas.FindAsync(id);
-            if (pessoa == null) throw new KeyNotFoundException("Pessoa não encontrada.");
+            if (pessoa == null)
+                throw new KeyNotFoundException("Pessoa não encontrada.");
 
-            PessoaValidator.ValidarPessoa(new Pessoa
-            {
-                Nome = dto.Nome,
-                CPF = dto.CPF
-            }, _context, id);
+            PessoaValidator.ValidarPessoa(
+                new Pessoa
+                {
+                    Nome = dto.Nome,
+                    CPF = dto.CPF,
+                    DataNascimento = dto.DataNascimento
+                }, _context, id);
 
-            pessoa.Nome = dto.Nome;
-            pessoa.Sexo = dto.Sexo;
-            pessoa.Email = dto.Email;
-            pessoa.DataNascimento = dto.DataNascimento;
-            pessoa.Naturalidade = dto.Naturalidade;
-            pessoa.Nacionalidade = dto.Nacionalidade;
-            pessoa.CPF = dto.CPF;
+            _mapper.Map(dto, pessoa);
             pessoa.DataAtualizacao = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
-            return pessoa;
+
+            return _mapper.Map<PessoaV1Dto>(pessoa);
         }
 
         public async Task DeleteAsync(int id)

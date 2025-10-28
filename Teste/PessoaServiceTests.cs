@@ -1,4 +1,5 @@
-﻿using Cadastro_Pessoa.Data;
+﻿using AutoMapper;
+using Cadastro_Pessoa.Data;
 using Cadastro_Pessoa.Models;
 using Cadastro_Pessoa.Models.DTO;
 using Cadastro_Pessoa.Service;
@@ -12,18 +13,29 @@ namespace CadastroPessoa.Tests.Services
     {
         private readonly DataContext _context;
         private readonly PessoaService _service;
+        private readonly IMapper _mapper;
+        private readonly ILoggerFactory _logFactory;
 
         public PessoaServiceTests()
         {
             var options = new DbContextOptionsBuilder<DataContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
+                          .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                          .Options;
 
             _context = new DataContext(options);
             _context.Pessoas.AddRange(PessoaMock.GetPessoas());
             _context.SaveChanges();
 
-            _service = new PessoaService(_context);
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.CreateMap<Pessoa, PessoaV1Dto>()
+                    .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
+                mc.CreateMap<Pessoa, PessoaV2Dto>()
+                    .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
+            }, _logFactory);
+
+            _mapper = mappingConfig.CreateMapper();
+            _service = new PessoaService(_context, _mapper);
         }
 
         [Fact]
@@ -71,7 +83,7 @@ namespace CadastroPessoa.Tests.Services
             // Assert
             Assert.NotNull(pessoaCriada);
             Assert.Equal("Ana Souza", pessoaCriada.Nome);
-            Assert.Equal(4, await _context.Pessoas.CountAsync()); 
+            Assert.Equal(4, await _context.Pessoas.CountAsync());
         }
 
         [Fact]
@@ -105,7 +117,7 @@ namespace CadastroPessoa.Tests.Services
             await _service.DeleteAsync(1);
 
             // Assert
-            Assert.Equal(2, await _context.Pessoas.CountAsync()); 
+            Assert.Equal(2, await _context.Pessoas.CountAsync());
             var pessoa = await _context.Pessoas.FindAsync(1);
             Assert.Null(pessoa);
         }

@@ -1,4 +1,5 @@
 using Cadastro_Pessoa.Data;
+using Cadastro_Pessoa.Mapping;
 using Cadastro_Pessoa.Models;
 using Cadastro_Pessoa.Service;
 using Cadastro_Pessoa.Service.Interfaces;
@@ -9,10 +10,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<MappingProfile>();
+});
 
 builder.Services.AddDbContext<DataContext>(opt =>
     opt.UseInMemoryDatabase("ApiCadastroPessoaDb"));
