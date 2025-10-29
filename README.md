@@ -4,9 +4,17 @@ API desenvolvida em **.NET 8** para gerenciar o cadastro de pessoas.
 Possui autenticação via **JWT (JSON Web Token)**, armazenamento em **banco de dados em memória (InMemoryDatabase)** e está **hospedada no Azure App Service**.  
 Inclui testes automatizados escritos com **xUnit**.
 
-🌐 **API publicada:**  
-👉 [https://cadastropessoaapi-eceef3euh4e0hdbs.brazilsouth-01.azurewebsites.net/swagger](https://cadastropessoaapi-eceef3euh4e0hdbs.brazilsouth-01.azurewebsites.net/swagger)
+---
 
+## 🌐 API publicada
+
+A API está disponível no seguinte endereço com Swagger UI:  
+
+[https://cadastropessoaapi-eceef3euh4e0hdbs.brazilsouth-01.azurewebsites.net/swagger](https://cadastropessoaapi-eceef3euh4e0hdbs.brazilsouth-01.azurewebsites.net/swagger)
+
+> ⚠️ No Swagger, você encontrará **duas versões da API**:
+> - **v1** → versão inicial da API para cadastro de pessoas.  
+> - **v2** → versão atualizada com endereço.
 ---
 
 ## 🚀 Funcionalidades
@@ -66,11 +74,12 @@ Para obter o token, envie um `POST` para o endpoint:
   "username": "admin",
   "password": "123456"
 }
-
+```
 ### 🔸 Resposta Esperada
+```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6..."
 }
-
+```
 
 
